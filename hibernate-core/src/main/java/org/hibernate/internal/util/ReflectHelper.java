@@ -525,8 +525,7 @@ public final class ReflectHelper {
 			// try "get"
 			if ( methodName.startsWith( "get" ) ) {
 				final String stemName = methodName.substring( 3 );
-				final String decapitalizedStemName = Introspector.decapitalize( stemName );
-				if ( stemName.equals( propertyName ) || decapitalizedStemName.equals( propertyName ) ) {
+				if ( stemName.equals( propertyName ) || Introspector.decapitalize( stemName ).equals( propertyName ) ) {
 					verifyNoIsVariantExists( containerClass, propertyName, method, stemName, declaredMethods);
 					return method;
 				}
@@ -536,8 +535,7 @@ public final class ReflectHelper {
 			// if not "get", then try "is"
 			if ( methodName.startsWith( "is" ) ) {
 				final String stemName = methodName.substring( 2 );
-				String decapitalizedStemName = Introspector.decapitalize( stemName );
-				if ( stemName.equals( propertyName ) || decapitalizedStemName.equals( propertyName ) ) {
+				if ( stemName.equals( propertyName ) || Introspector.decapitalize( stemName ).equals( propertyName ) ) {
 					verifyNoGetVariantExists( containerClass, propertyName, method, stemName, declaredMethods);
 					return method;
 				}
@@ -690,8 +688,7 @@ public final class ReflectHelper {
 			final String methodName = method.getName();
 			if ( method.getParameterCount() == 1 && methodName.startsWith( "set" ) ) {
 				final String testOldMethod = methodName.substring( 3 );
-				final String testStdMethod = Introspector.decapitalize( testOldMethod );
-				if ( testStdMethod.equals( propertyName ) || testOldMethod.equals( propertyName ) ) {
+				if (testOldMethod.equals( propertyName ) || Introspector.decapitalize( testOldMethod ).equals( propertyName )) {
 					potentialSetter = method;
 					if ( propertyType == null || method.getParameterTypes()[0].equals( propertyType ) ) {
 						break;
@@ -730,8 +727,7 @@ public final class ReflectHelper {
 			// try "get"
 			if ( methodName.startsWith( "get" ) ) {
 				final String stemName = methodName.substring( 3 );
-				final String decapitalizedStemName = Introspector.decapitalize( stemName );
-				if ( stemName.equals( propertyName ) || decapitalizedStemName.equals( propertyName ) ) {
+				if ( stemName.equals( propertyName ) || Introspector.decapitalize( stemName ).equals( propertyName ) ) {
 					return method;
 				}
 
@@ -740,8 +736,7 @@ public final class ReflectHelper {
 			// if not "get", then try "is"
 			if ( methodName.startsWith( "is" ) ) {
 				final String stemName = methodName.substring( 2 );
-				String decapitalizedStemName = Introspector.decapitalize( stemName );
-				if ( stemName.equals( propertyName ) || decapitalizedStemName.equals( propertyName ) ) {
+				if ( stemName.equals( propertyName ) || Introspector.decapitalize( stemName ).equals( propertyName ) ) {
 					return method;
 				}
 			}
