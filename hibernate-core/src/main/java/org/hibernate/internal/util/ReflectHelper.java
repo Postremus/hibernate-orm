@@ -13,7 +13,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 import javax.persistence.Transient;
 
@@ -49,6 +51,9 @@ public final class ReflectHelper {
 	private static final Method OBJECT_EQUALS;
 	private static final Method OBJECT_HASHCODE;
 
+	private static final Map<Class<?>, Method[]> METHODS_BY_CLASS = new HashMap<>();
+	private static final Map<Class<?>, Field[]> FIELDS_BY_CLASS = new HashMap<>();
+
 	static {
 		Method eq;
 		Method hash;
@@ -62,11 +67,18 @@ public final class ReflectHelper {
 		OBJECT_EQUALS = eq;
 		OBJECT_HASHCODE = hash;
 	}
-
 	/**
 	 * Disallow instantiation of ReflectHelper.
 	 */
 	private ReflectHelper() {
+	}
+
+	private static Method[] getDeclaredMethodsOfClass(Class<?> clazz) {
+		return METHODS_BY_CLASS.computeIfAbsent(clazz, name -> clazz.getDeclaredMethods());
+	}
+
+	private static Field[] getDeclaredFieldsOfClass(Class<?> clazz) {
+		return FIELDS_BY_CLASS.computeIfAbsent(clazz, name -> clazz.getDeclaredFields());
 	}
 
 	/**
@@ -423,7 +435,7 @@ public final class ReflectHelper {
 			return null;
 		}
 
-		Field field = findField(propertyName, clazz.getDeclaredFields());
+		Field field = findField(propertyName, getDeclaredFieldsOfClass(clazz));
 		if (field == null) {
 			return locateField( clazz.getSuperclass(), propertyName );
 		}
@@ -488,7 +500,7 @@ public final class ReflectHelper {
 	}
 
 	private static Method getGetterOrNull(Class containerClass, String propertyName) {
-		Method[] declaredMethods = containerClass.getDeclaredMethods();
+		Method[] declaredMethods = getDeclaredMethodsOfClass(containerClass);
 		for ( Method method : declaredMethods) {
 			// if the method has parameters, skip it
 			if ( method.getParameterCount() != 0 ) {
@@ -672,7 +684,7 @@ public final class ReflectHelper {
 	private static Method setterOrNull(Class theClass, String propertyName, Class propertyType) {
 		Method potentialSetter = null;
 
-		for ( Method method : theClass.getDeclaredMethods() ) {
+		for ( Method method : getDeclaredMethodsOfClass(theClass) ) {
 			final String methodName = method.getName();
 			if ( method.getParameterCount() == 1 && methodName.startsWith( "set" ) ) {
 				final String testOldMethod = methodName.substring( 3 );
@@ -696,7 +708,7 @@ public final class ReflectHelper {
 	 * as an abstract - but again, that is such an edge case...
 	 */
 	public static Method findGetterMethodForFieldAccess(Field field, String propertyName) {
-		for ( Method method : field.getDeclaringClass().getDeclaredMethods() ) {
+		for ( Method method : getDeclaredMethodsOfClass(field.getDeclaringClass()) ) {
 			// if the method has parameters, skip it
 			if ( method.getParameterCount() != 0 ) {
 				continue;
