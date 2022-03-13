@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.internal.util.IntrospectedClass;
 import org.hibernate.internal.util.ReflectHelper;
 import org.hibernate.property.access.internal.AbstractFieldSerialForm;
 
@@ -24,13 +25,13 @@ import org.hibernate.property.access.internal.AbstractFieldSerialForm;
  * @author Steve Ebersole
  */
 public class GetterFieldImpl implements Getter {
-	private final Class containerClass;
+	private final IntrospectedClass containerClass;
 	private final String propertyName;
 	private final Field field;
 	private final Method getterMethod;
 
-	public GetterFieldImpl(Class containerClass, String propertyName, Field field) {
-		this.containerClass = containerClass;
+	public GetterFieldImpl(IntrospectedClass introspectedClass, String propertyName, Field field) {
+		this.containerClass = introspectedClass;
 		this.propertyName = propertyName;
 		this.field = field;
 

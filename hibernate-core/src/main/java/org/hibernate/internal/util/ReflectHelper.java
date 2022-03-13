@@ -51,9 +51,6 @@ public final class ReflectHelper {
 	private static final Method OBJECT_EQUALS;
 	private static final Method OBJECT_HASHCODE;
 
-	private static final Map<Class<?>, Method[]> METHODS_BY_CLASS = new HashMap<>();
-	private static final Map<Class<?>, Field[]> FIELDS_BY_CLASS = new HashMap<>();
-
 	static {
 		Method eq;
 		Method hash;
@@ -71,14 +68,6 @@ public final class ReflectHelper {
 	 * Disallow instantiation of ReflectHelper.
 	 */
 	private ReflectHelper() {
-	}
-
-	private static Method[] getDeclaredMethodsOfClass(Class<?> clazz) {
-		return METHODS_BY_CLASS.computeIfAbsent(clazz, name -> clazz.getDeclaredMethods());
-	}
-
-	private static Field[] getDeclaredFieldsOfClass(Class<?> clazz) {
-		return FIELDS_BY_CLASS.computeIfAbsent(clazz, name -> clazz.getDeclaredFields());
 	}
 
 	/**
@@ -396,11 +385,11 @@ public final class ReflectHelper {
 		}
 	}
 
-	public static Field findField(Class containerClass, String propertyName) {
+	public static Field findField(IntrospectedClass containerClass, String propertyName) {
 		if ( containerClass == null ) {
 			throw new IllegalArgumentException( "Class on which to find field [" + propertyName + "] cannot be null" );
 		}
-		else if ( containerClass == Object.class ) {
+		else if ( containerClass.isObjectClass() ) {
 			throw new IllegalArgumentException( "Illegal attempt to locate field [" + propertyName + "] on Object.class" );
 		}
 
@@ -412,7 +401,7 @@ public final class ReflectHelper {
 							Locale.ROOT,
 							"Could not locate field name [%s] on class [%s]",
 							propertyName,
-							containerClass.getName()
+							containerClass.getClazz().getName()
 					)
 			);
 		}
@@ -430,19 +419,19 @@ public final class ReflectHelper {
 		accessibleObject.setAccessible( true );
 	}
 
-	private static Field locateField(Class clazz, String propertyName) {
-		if ( clazz == null || Object.class.equals( clazz ) ) {
+	private static Field locateField(IntrospectedClass clazz, String propertyName) {
+		if ( clazz == null || clazz.isObjectClass() ) {
 			return null;
 		}
 
-		Field field = findField(propertyName, getDeclaredFieldsOfClass(clazz));
+		Field field = findField(propertyName, clazz.getDeclaredFields());
 		if (field == null) {
-			return locateField( clazz.getSuperclass(), propertyName );
+			return locateField( new IntrospectedClass( clazz.getClazz().getSuperclass() ), propertyName );
 		}
 		if ( !isStaticField( field ) ) {
 			return field;
 		}
-		return locateField( clazz.getSuperclass(), propertyName );
+		return locateField( new IntrospectedClass( clazz.getClazz().getSuperclass() ), propertyName );
 	}
 
 	public static boolean isStaticField(Field field) {

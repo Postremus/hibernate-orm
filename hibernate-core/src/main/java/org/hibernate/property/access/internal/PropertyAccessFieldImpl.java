@@ -8,6 +8,7 @@ package org.hibernate.property.access.internal;
 
 import java.lang.reflect.Field;
 
+import org.hibernate.internal.util.IntrospectedClass;
 import org.hibernate.internal.util.ReflectHelper;
 import org.hibernate.property.access.spi.Getter;
 import org.hibernate.property.access.spi.GetterFieldImpl;
@@ -31,9 +32,11 @@ public class PropertyAccessFieldImpl implements PropertyAccess {
 			final String propertyName) {
 		this.strategy = strategy;
 
-		final Field field = ReflectHelper.findField( containerJavaType, propertyName );
-		this.getter = new GetterFieldImpl( containerJavaType, propertyName, field );
-		this.setter = new SetterFieldImpl( containerJavaType, propertyName, field );
+		IntrospectedClass clazz = new IntrospectedClass( containerJavaType );
+
+		final Field field = ReflectHelper.findField( clazz, propertyName );
+		this.getter = new GetterFieldImpl( clazz, propertyName, field );
+		this.setter = new SetterFieldImpl( clazz, propertyName, field );
 	}
 
 	@Override
